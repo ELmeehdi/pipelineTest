@@ -1,32 +1,39 @@
-#dont work
-
 pipeline {
     agent any
+
     stages {
-        stage('Checkout') {
+        stage('List files') {
             steps {
-                git branch: 'main', url: 'https://github.com/ELmeehdi/pipelineTest.git'
+                bat 'dir'
             }
         }
-        stage('Build') {
+        stage('Compile') {
             steps {
-                sh 'mvn clean compile'
+                bat 'javac -d out src/Main.java'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'java -classpath lib/* src/MainTest.java'
             }
         }
-        stage('Deploy') {
+        stage('Run') {
             steps {
-                sh 'scp target/*.jar user@server:/path/to/deploy'
+                bat 'java -cp out Main'
             }
         }
     }
+
     post {
         always {
-            sh 'mvn clean'
+            echo 'Pipeline completed.'
+            archiveArtifacts artifacts: 'out/*.class', allowEmptyArchive: true
+        }
+        success {
+            echo 'Build and tests were successful!'
+        }
+        failure {
+            echo 'There was an error in the pipeline.'
         }
     }
 }
