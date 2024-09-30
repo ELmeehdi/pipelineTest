@@ -1,39 +1,46 @@
 pipeline {
     agent any
+    tools {
+        maven 'maven'
+        jdk 'jdk17'
+    }
+
+
 
     stages {
-        stage('List files') {
+
+        stage('Declarative: Checkout SCM') {
             steps {
-                bat 'dir'
+                checkout scm
             }
         }
-        stage('Compile') {
+        stage('Checkout') {
             steps {
-                bat 'javac -d out src/Main.java'
+                echo 'is new'
             }
         }
-        stage('Test') {
+        stage('Display Message') {
             steps {
-                bat 'java -classpath lib/* src/MainTest.java'
+                echo 'Displaying message'
             }
         }
-        stage('Run') {
+        stage('Build') {
             steps {
-                bat 'java -cp out Main'
+                bat 'mvn clean compile'
+            }
+        }
+        stage('mvn clean package successful passed') {
+            steps {
+                bat 'mvn clean package'
             }
         }
     }
-
     post {
-        always {
-            echo 'Pipeline completed.'
-            archiveArtifacts artifacts: 'out/*.class', allowEmptyArchive: true
-        }
         success {
-            echo 'Build and tests were successful!'
+            echo 'Build successful!'
         }
         failure {
-            echo 'There was an error in the pipeline.'
+            echo 'Build failed!'
         }
     }
 }
